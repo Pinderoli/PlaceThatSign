@@ -68,10 +68,30 @@ struct Sign: Identifiable, Codable {
 
 ## Current project state
 
-- Xcode project created at: ~/Documents/Coding/XCode/PlaceThatSign/
-- GitHub repo initialised and pushed (main branch, clean .gitignore)
-- Default SwiftUI template in place (ContentView.swift, PlaceThatSignApp.swift)
-- No custom code written yet — starting from scratch
+- Xcode project at: ~/Documents/Coding/XCode/PlaceThatSign/ (created 2026-06-08)
+- GitHub repo live on main branch with clean .gitignore
+
+**Phase 1, Step 1 — DONE**: SwiftUI app skeleton
+- 3-tab `TabView` in `ContentView`: "My Signs" (tag 0), "AR" (tag 1, default), "Settings" (tag 2)
+- `LocationService` and `SignService` instantiated in `ContentView`, injected as `@Observable` environment objects
+
+**Phase 1, Step 2 — DONE**: CoreLocation integration
+- `LocationService` requests `whenInUse` authorisation, publishes live `coordinate: CLLocationCoordinate2D?`
+- Live GPS coordinate overlay displayed in `ARSignView` (shows "Acquiring GPS…" until fix)
+
+**Phase 1, Step 3 — NOT STARTED**: ARKit / ARGeoAnchor
+- `ARSignView` is a placeholder (black screen + "AR view coming soon" text)
+- "Place Sign" button is rendered but action is a no-op `{}`
+- No ARKit or RealityKit code written yet
+
+**Phase 1, Step 4 — NOT STARTED**: Backend / real data
+- `SignService` is entirely in-memory with 3 hardcoded sample signs (Canterbury/Kent area coords)
+- Placement validation already implemented: 100-char message limit, 3 signs/day cap, 50 m minimum spacing between own signs
+- No network calls exist yet
+
+**Other completed views**:
+- `MySignsView` — segmented list/map picker; list shows message + lat/lng; map uses MapKit `Marker` + `UserAnnotation`
+- `SettingsView` — static "Oliver" author name, version 0.1.0
 
 ## Naming conventions
 
@@ -84,6 +104,8 @@ struct Sign: Identifiable, Codable {
 
 **Phase 2**: Proximity push notifications (CoreLocation geofencing), community voting
 (upvote/flag), user accounts + auth.
+
+Future — LiDAR surface snapping: On LiDAR devices use ARWorldTrackingConfiguration scene reconstruction to snap signs to real surfaces. Non-LiDAR devices get floating anchors at fixed height.
 
 **Phase 3**: Premium sign skins (StoreKit 2), sign boosting (larger radius, ping nearby
 users), Apple Vision Pro / Meta support via RealityKit visionOS target.
