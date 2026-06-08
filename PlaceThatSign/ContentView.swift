@@ -1,21 +1,35 @@
-//
-//  ContentView.swift
-//  PlaceThatSign
-//
-//  Created by Oliver Pinder on 08/06/2026.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedTab = 1
+    @State private var locationService = LocationService()
+    @State private var signService = SignService()
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView(selection: $selectedTab) {
+            MySignsView()
+                .tabItem {
+                    Label("My Signs", systemImage: "signpost.right.and.left")
+                }
+                .tag(0)
+
+            ARSignView()
+                .tabItem {
+                    Label("AR", systemImage: "camera.viewfinder")
+                }
+                .tag(1)
+
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape")
+                }
+                .tag(2)
         }
-        .padding()
+        .environment(locationService)
+        .environment(signService)
+        .onAppear {
+            locationService.start()
+        }
     }
 }
 
