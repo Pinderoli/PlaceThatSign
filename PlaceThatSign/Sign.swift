@@ -9,4 +9,9 @@ struct Sign: Identifiable, Codable {
     let message: String
     let author: String
     let createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id, latitude, longitude, message, author
+        case createdAt = "created_at"
+    }
 }

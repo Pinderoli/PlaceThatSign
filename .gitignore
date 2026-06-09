@@ -10,3 +10,6 @@ build/
 *.dSYM.zip
 *.dSYM
 Pods/
+
+# Local secrets — copy Secrets.xcconfig.example to Secrets.xcconfig and fill in.
+Secrets.xcconfig
