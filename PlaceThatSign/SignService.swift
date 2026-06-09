@@ -12,6 +12,10 @@ class SignService {
     static let maxSignsPerDay               = 3     // free tier daily cap
     static let minimumSignSpacing: Double   = 50    // metres — prevents stacking own signs
 
+    // Dev toggle — set to `true` to re-enable the daily cap, spacing rule, and message length cap.
+    // Kept off during early development so seed data doesn't block placement testing.
+    static let enforcePlacementLimits = false
+
     // MARK: - State
     private(set) var signs: [Sign] = [
         Sign(id: UUID(), latitude: 51.2802, longitude: 1.0789, message: "Jeff was here.", author: "Oliver", createdAt: .now),
@@ -49,20 +53,22 @@ class SignService {
     }
 
     func place(message: String, at coordinate: CLLocationCoordinate2D, author: String) throws -> Sign {
-        guard message.count <= Sign.maxMessageLength else {
-            throw PlacementError.messageTooLong
-        }
+        if Self.enforcePlacementLimits {
+            guard message.count <= Sign.maxMessageLength else {
+                throw PlacementError.messageTooLong
+            }
 
-        let signsToday = signs.filter { Calendar.current.isDateInToday($0.createdAt) }
-        guard signsToday.count < Self.maxSignsPerDay else {
-            throw PlacementError.dailyLimitReached
-        }
+            let signsToday = signs.filter { Calendar.current.isDateInToday($0.createdAt) }
+            guard signsToday.count < Self.maxSignsPerDay else {
+                throw PlacementError.dailyLimitReached
+            }
 
-        let newLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        for existing in signs {
-            let d = distanceTo(existing, from: newLocation)
-            if d < Self.minimumSignSpacing {
-                throw PlacementError.tooCloseToExistingSign(metres: Int(d))
+            let newLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            for existing in signs {
+                let d = distanceTo(existing, from: newLocation)
+                if d < Self.minimumSignSpacing {
+                    throw PlacementError.tooCloseToExistingSign(metres: Int(d))
+                }
             }
         }
 

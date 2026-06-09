@@ -30,7 +30,7 @@ final class SupabaseService {
     func insertSign(message: String, latitude: Double, longitude: Double, author: String) async throws -> Sign {
         let payload = SignInsert(message: message, latitude: latitude, longitude: longitude, author: author)
         let inserted: Sign = try await client
-            .from("signs")
+            .from("Signs")
             .insert(payload)
             .select()
             .single()
@@ -43,7 +43,7 @@ final class SupabaseService {
     // (`signs_within_radius`) once the table grows beyond a few hundred rows.
     func fetchNearbySigns(lat: Double, lng: Double, radiusMetres: Double) async throws -> [Sign] {
         let all: [Sign] = try await client
-            .from("signs")
+            .from("Signs")
             .select()
             .execute()
             .value

@@ -20,7 +20,7 @@ GitHub: https://github.com/Pinderoli/PlaceThatSign
 - **Language**: Swift (SwiftUI for UI)
 - **AR**: ARKit + RealityKit, ARGeoAnchor for GPS-to-AR coordinate bridging
 - **Location**: CoreLocation
-- **Backend**: TBD (Supabase or lightweight Vapor/Node API)
+- **Backend**: Supabase (Swift SDK v2.47.0 via SPM)
 - **Database**: PostgreSQL + PostGIS (geospatial radius queries)
 - **Version control**: Git, GitHub (main branch)
 
@@ -68,30 +68,39 @@ struct Sign: Identifiable, Codable {
 
 ## Current project state
 
-- Xcode project at: ~/Documents/Coding/XCode/PlaceThatSign/ (created 2026-06-08)
+- Xcode project at: ~/Documents/Home/XCode/PlaceThatSign/ (created 2026-06-08)
 - GitHub repo live on main branch with clean .gitignore
 
 **Phase 1, Step 1 — DONE**: SwiftUI app skeleton
 - 3-tab `TabView` in `ContentView`: "My Signs" (tag 0), "AR" (tag 1, default), "Settings" (tag 2)
-- `LocationService` and `SignService` instantiated in `ContentView`, injected as `@Observable` environment objects
+- `LocationService`, `SignService`, and `SupabaseService` instantiated in `ContentView`, injected as `@Observable` environment objects
 
 **Phase 1, Step 2 — DONE**: CoreLocation integration
 - `LocationService` requests `whenInUse` authorisation, publishes live `coordinate: CLLocationCoordinate2D?`
+- Also exposes `authorizationStatus: CLAuthorizationStatus`
 - Live GPS coordinate overlay displayed in `ARSignView` (shows "Acquiring GPS…" until fix)
 
-**Phase 1, Step 3 — NOT STARTED**: ARKit / ARGeoAnchor
-- `ARSignView` is a placeholder (black screen + "AR view coming soon" text)
-- "Place Sign" button is rendered but action is a no-op `{}`
-- No ARKit or RealityKit code written yet
+**Phase 1, Step 3 — IN PROGRESS**: ARKit / ARGeoAnchor
+- `ARSignView` still shows a black screen placeholder ("AR view coming soon") — no ARKit/RealityKit rendering yet
+- "Place Sign" button IS wired up: opens `PlaceSignSheet` modal (message input, char count, validation)
+- `placeSign()` calls `signService.place()` locally and fires a `SupabaseService.insertSign()` Task
+- Error alert shown if placement rules are violated
+- **Still needed**: Replace black screen with a real `ARView`/`ARGeoTrackingConfiguration`, add `ARGeoAnchor` per sign, render floating text entity in RealityKit
 
-**Phase 1, Step 4 — NOT STARTED**: Backend / real data
-- `SignService` is entirely in-memory with 3 hardcoded sample signs (Canterbury/Kent area coords)
-- Placement validation already implemented: 100-char message limit, 3 signs/day cap, 50 m minimum spacing between own signs
-- No network calls exist yet
+**Phase 1, Step 4 — IN PROGRESS**: Backend / real data
+- `SupabaseService` fully scaffolded (`SupabaseService.swift`):
+  - `insertSign()` — inserts a new sign row; called immediately on successful local placement
+  - `fetchNearbySigns()` — fetches all rows and filters client-side by radius; **implemented but never called yet**
+- Supabase Swift SDK v2.47.0 added via SPM
+- Credentials injected via `Secrets.xcconfig` (gitignored) → `Info.plist` → `Bundle.main`; `Secrets.xcconfig.example` checked in as a template
+- `SignService` still seeds 3 hardcoded signs on init (Canterbury/Kent coords) — no fetch-on-launch yet
+- **Still needed**: Call `fetchNearbySigns()` on app launch / location fix to populate `SignService.signs` from Supabase; replace client-side radius filter with a PostGIS RPC once data grows
+- Placement validation rules in `SignService`: 100-char message limit, 3 signs/day cap, 50 m minimum spacing — currently bypassed by `enforcePlacementLimits = false` dev toggle
 
-**Other completed views**:
+**Other completed views/files**:
 - `MySignsView` — segmented list/map picker; list shows message + lat/lng; map uses MapKit `Marker` + `UserAnnotation`
 - `SettingsView` — static "Oliver" author name, version 0.1.0
+- `Sign.swift` — model with `CodingKeys` mapping `createdAt` ↔ `created_at` for Supabase compatibility; `maxMessageLength = 100` static constant
 
 ## Naming conventions
 
@@ -107,6 +116,8 @@ struct Sign: Identifiable, Codable {
 
 Future — LiDAR surface snapping: On LiDAR devices use ARWorldTrackingConfiguration scene reconstruction to snap signs to real surfaces. Non-LiDAR devices get floating anchors at fixed height.
 
+Auth approach: Passkeys via Apple's ASAuthorization framework + Supabase Auth WebAuthn. No email/password. Face ID on first launch generates a persistent user identity. device_id is the Phase 1 placeholder.
+
 **Phase 3**: Premium sign skins (StoreKit 2), sign boosting (larger radius, ping nearby
 users), Apple Vision Pro / Meta support via RealityKit visionOS target.
 
@@ -114,5 +125,5 @@ users), Apple Vision Pro / Meta support via RealityKit visionOS target.
 
 - Don't use MapKit as a substitute for AR — the AR view is the primary interface
 - Don't manually convert GPS coordinates to AR space — use ARGeoAnchor
-- Don't build a backend before AR is working with hardcoded data
+- Don't add server-side PostGIS queries or auth before AR is working end-to-end
 - Don't add Phase 2/3 features before Phase 1 is solid

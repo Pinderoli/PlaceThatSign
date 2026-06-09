@@ -4,6 +4,7 @@ struct ContentView: View {
     @State private var selectedTab = 1
     @State private var locationService = LocationService()
     @State private var signService = SignService()
+    @State private var supabaseService = SupabaseService()
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -27,6 +28,7 @@ struct ContentView: View {
         }
         .environment(locationService)
         .environment(signService)
+        .environment(supabaseService)
         .onAppear {
             locationService.start()
         }

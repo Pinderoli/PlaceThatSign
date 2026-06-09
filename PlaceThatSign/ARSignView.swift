@@ -4,6 +4,7 @@ import CoreLocation
 struct ARSignView: View {
     @Environment(LocationService.self) private var locationService
     @Environment(SignService.self) private var signService
+    @Environment(SupabaseService.self) private var supabaseService
 
     @State private var isPlacingSign = false
     @State private var placementErrorMessage: String?
@@ -61,6 +62,19 @@ struct ARSignView: View {
         do {
             _ = try signService.place(message: trimmed, at: coordinate, author: "Oliver")
             isPlacingSign = false
+
+            Task {
+                do {
+                    _ = try await supabaseService.insertSign(
+                        message: trimmed,
+                        latitude: coordinate.latitude,
+                        longitude: coordinate.longitude,
+                        author: "Oliver"
+                    )
+                } catch {
+                    print("Supabase insertSign failed: \(error)")
+                }
+            }
         } catch {
             placementErrorMessage = error.localizedDescription
         }
@@ -139,4 +153,5 @@ private struct PlaceSignSheet: View {
     ARSignView()
         .environment(LocationService())
         .environment(SignService())
+        .environment(SupabaseService())
 }

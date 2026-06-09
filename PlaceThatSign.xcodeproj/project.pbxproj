@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A73EC7F02FD84D2900EC8798 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A73EC7EF2FD84D2900EC8798 /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D12A52FB2FD7692600C13652 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +33,24 @@
 		D12A53042FD7692600C13652 /* PlaceThatSignUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlaceThatSignUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A73EC7F52FD84F0700EC8798 /* Exceptions for "PlaceThatSign" folder in "PlaceThatSign" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Secrets.xcconfig,
+				Secrets.xcconfig.example,
+			);
+			target = D12A52EC2FD7692500C13652 /* PlaceThatSign */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D12A52EF2FD7692500C13652 /* PlaceThatSign */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A73EC7F52FD84F0700EC8798 /* Exceptions for "PlaceThatSign" folder in "PlaceThatSign" target */,
+			);
 			path = PlaceThatSign;
 			sourceTree = "<group>";
 		};
@@ -52,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A73EC7F02FD84D2900EC8798 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +132,7 @@
 			);
 			name = PlaceThatSign;
 			packageProductDependencies = (
+				A73EC7EF2FD84D2900EC8798 /* Supabase */,
 			);
 			productName = PlaceThatSign;
 			productReference = D12A52ED2FD7692500C13652 /* PlaceThatSign.app */;
@@ -195,6 +216,9 @@
 			);
 			mainGroup = D12A52E42FD7692500C13652;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A73EC7EE2FD84D2900EC8798 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D12A52EE2FD7692500C13652 /* Products */;
 			projectDirPath = "";
@@ -271,6 +295,8 @@
 /* Begin XCBuildConfiguration section */
 		D12A530C2FD7692600C13652 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = D12A52EF2FD7692500C13652 /* PlaceThatSign */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -335,6 +361,8 @@
 		};
 		D12A530D2FD7692600C13652 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = D12A52EF2FD7692500C13652 /* PlaceThatSign */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -392,6 +420,8 @@
 		};
 		D12A530F2FD7692600C13652 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = D12A52EF2FD7692500C13652 /* PlaceThatSign */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -400,6 +430,7 @@
 				DEVELOPMENT_TEAM = 6GA6PJQ6B5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PlaceThatSign/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "PlaceThatSign needs your location to show and place signs near you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -425,6 +456,8 @@
 		};
 		D12A53102FD7692600C13652 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = D12A52EF2FD7692500C13652 /* PlaceThatSign */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -433,6 +466,7 @@
 				DEVELOPMENT_TEAM = 6GA6PJQ6B5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PlaceThatSign/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "PlaceThatSign needs your location to show and place signs near you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -580,6 +614,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A73EC7EE2FD84D2900EC8798 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A73EC7EF2FD84D2900EC8798 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A73EC7EE2FD84D2900EC8798 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D12A52E52FD7692500C13652 /* Project object */;
 }
