@@ -5,18 +5,28 @@ import Supabase
 
 @Observable
 final class SupabaseService {
-    private let client: SupabaseClient
+    private let client: SupabaseClient?
+
+    var isConfigured: Bool { client != nil }
 
     init() {
-        guard
-            let urlString = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,
-            let url = URL(string: urlString),
-            let anonKey = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_ANON_KEY") as? String,
-            !urlString.isEmpty, !anonKey.isEmpty
-        else {
-            fatalError("Missing SUPABASE_URL / SUPABASE_ANON_KEY in Info.plist. Did you wire up Secrets.xcconfig?")
+        if let urlString = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,
+           !urlString.isEmpty,
+           let url = URL(string: urlString),
+           let anonKey = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_ANON_KEY") as? String,
+           !anonKey.isEmpty {
+            self.client = SupabaseClient(supabaseURL: url, supabaseKey: anonKey)
+        } else {
+            print("⚠️ SupabaseService: missing SUPABASE_URL / SUPABASE_ANON_KEY in Info.plist. Running offline. Most common cause: stale build — try Product > Clean Build Folder (⇧⌘K) and rebuild.")
+            self.client = nil
         }
-        self.client = SupabaseClient(supabaseURL: url, supabaseKey: anonKey)
+    }
+
+    enum ConfigError: LocalizedError {
+        case notConfigured
+        var errorDescription: String? {
+            "Supabase isn't configured for this build. Network calls will fail until Secrets.xcconfig values reach Info.plist."
+        }
     }
 
     private struct SignInsert: Encodable {
@@ -28,6 +38,7 @@ final class SupabaseService {
 
     @discardableResult
     func insertSign(message: String, latitude: Double, longitude: Double, author: String) async throws -> Sign {
+        guard let client else { throw ConfigError.notConfigured }
         let payload = SignInsert(message: message, latitude: latitude, longitude: longitude, author: author)
         let inserted: Sign = try await client
             .from("Signs")
@@ -42,6 +53,7 @@ final class SupabaseService {
     // Phase 1: pulls all rows and filters client-side. Replace with a PostGIS RPC
     // (`signs_within_radius`) once the table grows beyond a few hundred rows.
     func fetchNearbySigns(lat: Double, lng: Double, radiusMetres: Double) async throws -> [Sign] {
+        guard let client else { throw ConfigError.notConfigured }
         let all: [Sign] = try await client
             .from("Signs")
             .select()

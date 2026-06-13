@@ -60,7 +60,7 @@ struct ARSignView: View {
         guard !trimmed.isEmpty else { return }
 
         do {
-            _ = try signService.place(message: trimmed, at: coordinate, author: "Oliver")
+            _ = try signService.place(message: trimmed, at: coordinate, author: SignService.currentAuthor)
             isPlacingSign = false
 
             Task {
@@ -69,7 +69,7 @@ struct ARSignView: View {
                         message: trimmed,
                         latitude: coordinate.latitude,
                         longitude: coordinate.longitude,
-                        author: "Oliver"
+                        author: SignService.currentAuthor
                     )
                 } catch {
                     print("Supabase insertSign failed: \(error)")

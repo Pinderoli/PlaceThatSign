@@ -89,16 +89,52 @@ struct Sign: Identifiable, Codable {
 
 **Phase 1, Step 4 — IN PROGRESS**: Backend / real data
 - `SupabaseService` fully scaffolded (`SupabaseService.swift`):
-  - `insertSign()` — inserts a new sign row; called immediately on successful local placement
-  - `fetchNearbySigns()` — fetches all rows and filters client-side by radius; **implemented but never called yet**
+  - `insertSign()` — inserts a new sign row; called immediately on successful local placement in `ARSignView.placeSign()`
+  - `fetchNearbySigns()` — fetches all rows from Supabase and filters client-side by radius; now wired up
+  - `isConfigured: Bool` — `false` when credentials are missing; all calls throw `ConfigError.notConfigured` rather than crashing
+  - Offline-safe: if `SUPABASE_URL` / `SUPABASE_ANON_KEY` are absent from Info.plist, client is `nil` and a warning is printed; app still runs
 - Supabase Swift SDK v2.47.0 added via SPM
 - Credentials injected via `Secrets.xcconfig` (gitignored) → `Info.plist` → `Bundle.main`; `Secrets.xcconfig.example` checked in as a template
-- `SignService` still seeds 3 hardcoded signs on init (Canterbury/Kent coords) — no fetch-on-launch yet
-- **Still needed**: Call `fetchNearbySigns()` on app launch / location fix to populate `SignService.signs` from Supabase; replace client-side radius filter with a PostGIS RPC once data grows
+- `SignService.signs` starts empty — hardcoded seed data removed
+- `SignService.refreshNearbySigns(near:using:)` is the bridge between location updates and Supabase:
+  - Called from `ContentView` via `.task(id: locationService.coordinate?.latitude)` — fires on first GPS fix and on latitude change
+  - Guards against redundant fetches: skips if last fetch location < `refreshDistanceThreshold` (100 m) away
+  - On success, replaces `signs` array with fetched results
+- Radius constants in `SignService`:
+  - `arRenderRadius = 500 m` — signs shown as AR anchors
+  - `nearbyFeedRadius = 2_000 m` — signs shown in list/feed (also the Supabase fetch radius)
+  - `notificationRadius = 200 m` — future push trigger
+  - `refreshDistanceThreshold = 100 m` — minimum movement before re-fetching
+- Filter helpers in `SignService`: `signsForAR(near:)` and `signsForFeed(near:)` (not yet called by views)
 - Placement validation rules in `SignService`: 100-char message limit, 3 signs/day cap, 50 m minimum spacing — currently bypassed by `enforcePlacementLimits = false` dev toggle
+- **Still needed (database)**:
+  - Supabase `Signs` table must be created with the correct schema (see below) — this is a **hard blocker** for any real data to flow
+  - Replace client-side radius filter with a PostGIS RPC (`signs_within_radius`) once the table grows beyond a few hundred rows
+
+**Supabase database schema (must be set up before backend works)**
+
+Table name: `Signs` (capital S — matches the Swift code)
+
+```sql
+create extension if not exists postgis;
+
+create table "Signs" (
+  id          uuid primary key default gen_random_uuid(),
+  message     text        not null,
+  latitude    float8      not null,
+  longitude   float8      not null,
+  author      text        not null,
+  created_at  timestamptz not null default now()
+);
+```
+
+- `insertSign()` sends only `message, latitude, longitude, author` — Supabase generates `id` and `created_at`
+- The returned row is decoded as `Sign` (with `CodingKeys` mapping `created_at` → `createdAt`)
+- RLS: currently none required for Phase 1 (anon key has full read/write); add row-level security in Phase 2 with auth
+- Future: add a PostGIS `geography` column + index + `signs_within_radius(lat, lng, radius_m)` RPC to replace client-side filtering
 
 **Other completed views/files**:
-- `MySignsView` — segmented list/map picker; list shows message + lat/lng; map uses MapKit `Marker` + `UserAnnotation`
+- `MySignsView` — segmented list/map picker; filters to `currentAuthor`'s signs only; list shows message + lat/lng; map uses MapKit `Marker` + `UserAnnotation`
 - `SettingsView` — static "Oliver" author name, version 0.1.0
 - `Sign.swift` — model with `CodingKeys` mapping `createdAt` ↔ `created_at` for Supabase compatibility; `maxMessageLength = 100` static constant
 
@@ -125,5 +161,5 @@ users), Apple Vision Pro / Meta support via RealityKit visionOS target.
 
 - Don't use MapKit as a substitute for AR — the AR view is the primary interface
 - Don't manually convert GPS coordinates to AR space — use ARGeoAnchor
-- Don't add server-side PostGIS queries or auth before AR is working end-to-end
+- Don't add PostGIS RPC queries or auth before the basic `Signs` table is working and AR is end-to-end
 - Don't add Phase 2/3 features before Phase 1 is solid

@@ -5,7 +5,7 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section("Profile") {
-                    LabeledContent("Author name", value: "Oliver")
+                    LabeledContent("Author name", value: SignService.currentAuthor)
                 }
 
                 Section("About") {

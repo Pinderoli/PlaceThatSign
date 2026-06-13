@@ -7,6 +7,10 @@ struct MySignsView: View {
     enum ViewMode: Hashable { case list, map }
     @State private var viewMode: ViewMode = .list
 
+    private var mySigns: [Sign] {
+        signService.signs.filter { $0.author == SignService.currentAuthor }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -19,7 +23,7 @@ struct MySignsView: View {
                 .padding(.vertical, 8)
 
                 if viewMode == .list {
-                    List(signService.signs) { sign in
+                    List(mySigns) { sign in
                         VStack(alignment: .leading, spacing: 4) {
                             Text(sign.message)
                                 .font(.body)
@@ -32,7 +36,7 @@ struct MySignsView: View {
                     .listStyle(.plain)
                 } else {
                     Map {
-                        ForEach(signService.signs) { sign in
+                        ForEach(mySigns) { sign in
                             Marker(sign.message, coordinate: CLLocationCoordinate2D(latitude: sign.latitude, longitude: sign.longitude))
                         }
                         UserAnnotation()

@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreLocation
 
 struct ContentView: View {
     @State private var selectedTab = 1
@@ -31,6 +32,10 @@ struct ContentView: View {
         .environment(supabaseService)
         .onAppear {
             locationService.start()
+        }
+        .task(id: locationService.coordinate?.latitude) {
+            guard let coordinate = locationService.coordinate else { return }
+            await signService.refreshNearbySigns(near: coordinate, using: supabaseService)
         }
     }
 }

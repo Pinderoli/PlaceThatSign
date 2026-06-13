@@ -12,16 +12,19 @@ class SignService {
     static let maxSignsPerDay               = 3     // free tier daily cap
     static let minimumSignSpacing: Double   = 50    // metres — prevents stacking own signs
 
+    // Distance the user must move before we hit Supabase again.
+    static let refreshDistanceThreshold: Double = 100
+
+    // Single source of truth for the local user's display name.
+    static let currentAuthor = "Oliver"
+
     // Dev toggle — set to `true` to re-enable the daily cap, spacing rule, and message length cap.
     // Kept off during early development so seed data doesn't block placement testing.
     static let enforcePlacementLimits = false
 
     // MARK: - State
-    private(set) var signs: [Sign] = [
-        Sign(id: UUID(), latitude: 51.2802, longitude: 1.0789, message: "Jeff was here.", author: "Oliver", createdAt: .now),
-        Sign(id: UUID(), latitude: 51.2798, longitude: 1.0781, message: "Lots of mud ahead.", author: "Oliver", createdAt: .now),
-        Sign(id: UUID(), latitude: 51.2810, longitude: 1.0795, message: "I made it! 2026.", author: "Oliver", createdAt: .now),
-    ]
+    private(set) var signs: [Sign] = []
+    private var lastFetchLocation: CLLocation?
 
     // MARK: - Filtered views
 
@@ -31,6 +34,28 @@ class SignService {
 
     func signsForFeed(near location: CLLocation) -> [Sign] {
         signs.filter { distanceTo($0, from: location) <= Self.nearbyFeedRadius }
+    }
+
+    // MARK: - Refresh
+
+    @MainActor
+    func refreshNearbySigns(near coordinate: CLLocationCoordinate2D, using supabase: SupabaseService) async {
+        let newLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        if let last = lastFetchLocation, last.distance(from: newLocation) < Self.refreshDistanceThreshold {
+            return
+        }
+
+        do {
+            let fetched = try await supabase.fetchNearbySigns(
+                lat: coordinate.latitude,
+                lng: coordinate.longitude,
+                radiusMetres: Self.nearbyFeedRadius
+            )
+            signs = fetched
+            lastFetchLocation = newLocation
+        } catch {
+            print("SignService refresh failed: \(error)")
+        }
     }
 
     // MARK: - Placement
